@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkBook — Find Trusted Workers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN SYSTEM ===== */
+:root {
+  --brand: #1a1a2e;
+  --brand2: #16213e;
+  --accent: #e94560;
+  --accent2: #f5a623;
+  --teal: #0f9b8e;
+  --surface: #ffffff;
+  --surface2: #f7f7fa;
+  --surface3: #efeff4;
+  --text: #1a1a2e;
+  --text2: #5a5a7a;
+  --text3: #9090aa;
+  --border: #e2e2ee;
+  --success: #0f9b8e;
+  --warning: #f5a623;
+  --danger: #e94560;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(26,26,46,0.08);
+  --shadow-lg: 0 12px 48px rgba(26,26,46,0.14);
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--surface2);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+}
+h1,h2,h3,h4,h5 { font-family: var(--font-head); font-weight: 700; }
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: var(--font-body); }
+input, select, textarea { font-family: var(--font-body); }
+
+/* ===== LAYOUT ===== */
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+/* ===== NAVBAR ===== */
+nav {
+  background: var(--brand);
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  gap: 12px;
+}
+.nav-logo {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo span { color: var(--accent); }
+.nav-logo-icon {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-links button {
+  background: none; border: none;
+  color: rgba(255,255,255,0.75);
+  font-size: 14px; font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+.nav-links button:hover, .nav-links button.active {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+}
+.nav-actions { display: flex; align-items: center; gap: 8px; }
+.btn-nav-login {
+  background: none; border: 1.5px solid rgba(255,255,255,0.3);
+  color: #fff; padding: 7px 16px;
+  border-radius: 50px; font-size: 14px; font-weight: 500;
+  transition: var(--transition);
+}
+.btn-nav-login:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+.btn-nav-cta {
+  background: var(--accent); border: none;
+  color: #fff; padding: 8px 18px;
+  border-radius: 50px; font-size: 14px; font-weight: 600;
+  transition: var(--transition);
+}
+.btn-nav-cta:hover { background: #c73550; transform: translateY(-1px); }
+.user-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50px; padding: 5px 14px 5px 5px;
+  cursor: pointer;
+}
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+}
+.user-pill-name { font-size: 13px; font-weight: 500; color: #fff; }
+.user-pill-role { font-size: 11px; color: rgba(255,255,255,0.6); }
+.hamburger { display: none; background: none; border: none; color: #fff; font-size: 22px; padding: 4px; }
+.mobile-menu {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: var(--brand); padding: 20px;
+  flex-direction: column; gap: 8px;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu-close { align-self: flex-end; background: none; border: none; color: #fff; font-size: 28px; margin-bottom: 16px; cursor: pointer; }
+.mobile-menu button {
+  background: none; border: none; color: rgba(255,255,255,0.85);
+  font-size: 18px; font-weight: 600; padding: 16px;
+  border-radius: var(--radius); text-align: left;
+  transition: var(--transition);
+}
+.mobile-menu button:hover { background: rgba(255,255,255,0.1); }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 11px 22px; border-radius: 50px;
+  font-size: 14px; font-weight: 600;
+  transition: var(--transition); border: none; cursor: pointer;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #c73550; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(233,69,96,0.35); }
+.btn-secondary { background: var(--surface3); color: var(--text); }
+.btn-secondary:hover { background: var(--border); }
+.btn-outline { background: none; border: 1.5px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-teal:hover { background: #0d8578; transform: translateY(-1px); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn-lg { padding: 14px 32px; font-size: 16px; }
+.btn-block { width: 100%; justify-content: center; border-radius: var(--radius); }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* ===== FORMS ===== */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-control {
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px; color: var(--text);
+  background: var(--surface);
+  transition: var(--transition);
+  outline: none; width: 100%;
+}
+.form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(233,69,96,0.08); }
+textarea.form-control { resize: vertical; min-height: 80px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 50px; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.badge-success { background: rgba(15,155,142,0.12); color: var(--teal); }
+.badge-warning { background: rgba(245,166,35,0.15); color: #c07a00; }
+.badge-danger { background: rgba(233,69,96,0.12); color: var(--accent); }
+.badge-blue { background: rgba(59,130,246,0.12); color: #2563eb; }
+.badge-gray { background: var(--surface3); color: var(--text2); }
+
+/* ===== STARS ===== */
+.stars { display: inline-flex; gap: 2px; }
+.star { color: #ddd; font-size: 14px; }
+.star.filled { color: #f5a623; }
+
+/* ===== TOAST ===== */
+#toast-container {
+  position: fixed; top: 80px; right: 20px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+  padding: 12px 20px; border-radius: var(--radius);
+  font-size: 14px; font-weight: 500; color: #fff;
+  box-shadow: var(--shadow-lg); animation: slideIn 0.3s ease;
+  max-width: 320px;
+}
+.toast-success { background: var(--teal); }
+.toast-error { background: var(--accent); }
+.toast-info { background: var(--brand); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border-radius: 20px;
+  max-width: 520px; width: 100%;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+  animation: modalIn 0.25s ease;
+  max-height: 90vh; overflow-y: auto;
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: none; } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 24px 0;
+}
+.modal-title { font-size: 20px; font-weight: 700; }
+.modal-close {
+  background: var(--surface3); border: none;
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 18px; cursor: pointer; color: var(--text2);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+/* ===== LANDING PAGE ===== */
+.hero {
+  background: var(--brand);
+  padding: 80px 20px 60px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(233,69,96,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 80%, rgba(15,155,142,0.12) 0%, transparent 50%);
+}
+.hero-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+  align-items: center; position: relative;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(233,69,96,0.15); border: 1px solid rgba(233,69,96,0.3);
+  color: #f87a90; font-size: 13px; font-weight: 600;
+  padding: 5px 14px; border-radius: 50px; margin-bottom: 20px;
+  text-transform: uppercase; letter-spacing: 0.8px;
+}
+.hero h1 {
+  font-size: clamp(36px, 5vw, 58px);
+  color: #fff; line-height: 1.1; margin-bottom: 20px;
+}
+.hero h1 em { color: var(--accent); font-style: normal; }
+.hero-sub { color: rgba(255,255,255,0.65); font-size: 17px; line-height: 1.7; margin-bottom: 32px; }
+.hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero-stats {
+  display: flex; gap: 32px; margin-top: 40px; padding-top: 40px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.hero-stat { }
+.hero-stat-num { font-family: var(--font-head); font-size: 28px; font-weight: 800; color: #fff; }
+.hero-stat-label { font-size: 13px; color: rgba(255,255,255,0.5); }
+.hero-visual {
+  position: relative; display: flex; justify-content: center; align-items: center;
+}
+.hero-card-stack { position: relative; width: 320px; height: 340px; }
+.hero-card-float {
+  position: absolute; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(12px);
+  border-radius: 16px; padding: 18px;
+}
+.hcf-main { width: 280px; top: 0; left: 20px; }
+.hcf-rating { width: 180px; bottom: 20px; right: -10px; }
+.hcf-avail { width: 160px; bottom: 60px; left: -20px; }
+.hero-worker-info { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.hero-worker-avatar {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; color: #fff;
+}
+.hero-worker-name { font-family: var(--font-head); font-size: 16px; color: #fff; font-weight: 700; }
+.hero-worker-cat { font-size: 12px; color: rgba(255,255,255,0.6); }
+.hero-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.hero-chip {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8); font-size: 11px; padding: 3px 10px;
+  border-radius: 50px;
+}
+.hcf-rating { text-align: center; }
+.hcf-rating-num { font-family: var(--font-head); font-size: 32px; color: #f5a623; font-weight: 800; }
+.hcf-rating-label { font-size: 11px; color: rgba(255,255,255,0.6); }
+.hcf-avail-dot { display: flex; align-items: center; gap: 6px; }
+.dot-green { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+.hcf-avail-text { font-size: 12px; color: rgba(255,255,255,0.8); }
+
+/* Categories section */
+.section { padding: 60px 20px; }
+.section-head { text-align: center; margin-bottom: 40px; }
+.section-eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 10px; }
+.section-title { font-size: clamp(26px, 4vw, 38px); color: var(--text); }
+.section-sub { color: var(--text2); margin-top: 10px; font-size: 16px; }
+.categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+.category-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 24px 16px;
+  text-align: center; cursor: pointer;
+  transition: var(--transition);
+}
+.category-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow); }
+.category-icon { font-size: 36px; margin-bottom: 10px; }
+.category-name { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--text); }
+.category-count { font-size: 12px; color: var(--text3); margin-top: 3px; }
+
+/* How it works */
+.how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.how-step { text-align: center; }
+.how-num {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--brand); color: #fff;
+  font-family: var(--font-head); font-size: 20px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.how-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.how-desc { color: var(--text2); font-size: 14px; line-height: 1.7; }
+
+/* ===== AUTH PAGE ===== */
+.auth-wrap {
+  min-height: 100vh; background: var(--brand);
+  display: flex; align-items: center; justify-content: center; padding: 40px 20px;
+  position: relative;
+}
+.auth-wrap::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(233,69,96,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(15,155,142,0.15) 0%, transparent 50%);
+}
+.auth-box {
+  background: var(--surface); border-radius: 24px;
+  width: 100%; max-width: 460px;
+  padding: 40px; position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+}
+.auth-logo { text-align: center; margin-bottom: 28px; }
+.auth-logo-icon {
+  width: 56px; height: 56px; background: var(--brand);
+  border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px; font-size: 24px; color: var(--accent);
+}
+.auth-title { font-size: 26px; font-weight: 800; color: var(--text); text-align: center; }
+.auth-sub { color: var(--text2); text-align: center; font-size: 14px; margin-top: 6px; }
+.auth-tabs {
+  display: flex; background: var(--surface3);
+  border-radius: 10px; padding: 4px; margin-bottom: 24px;
+}
+.auth-tab {
+  flex: 1; padding: 9px; border: none; background: none;
+  border-radius: 7px; font-size: 14px; font-weight: 600;
+  color: var(--text2); transition: var(--transition); cursor: pointer;
+}
+.auth-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
+.auth-divider { text-align: center; color: var(--text3); font-size: 13px; position: relative; }
+.auth-divider::before, .auth-divider::after {
+  content: ''; position: absolute; top: 50%;
+  width: calc(50% - 30px); height: 1px; background: var(--border);
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after { right: 0; }
+.demo-creds {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px;
+  font-size: 13px; color: var(--text2);
+}
+.demo-creds h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); margin-bottom: 8px; }
+.demo-cred-row { display: flex; justify-content: space-between; padding: 3px 0; }
+.demo-cred-row b { color: var(--text); }
+
+/* ===== WORKER LISTINGS ===== */
+.listings-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
+.filters-sidebar { position: sticky; top: 80px; }
+.filter-card { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+.filter-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.filter-section { margin-bottom: 20px; }
+.filter-section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); margin-bottom: 10px; }
+.filter-options { display: flex; flex-direction: column; gap: 6px; }
+.filter-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--transition);
+  font-size: 14px; color: var(--text);
+}
+.filter-option:hover { background: var(--surface2); }
+.filter-option input { accent-color: var(--accent); width: 16px; height: 16px; }
+.filter-option.active-filter { background: rgba(233,69,96,0.06); color: var(--accent); font-weight: 600; }
+.search-bar { 
+  display: flex; gap: 10px; margin-bottom: 20px;
+  background: var(--surface); padding: 6px 6px 6px 16px;
+  border-radius: 50px; box-shadow: var(--shadow);
+  border: 1.5px solid var(--border);
+}
+.search-bar input { flex: 1; border: none; outline: none; font-size: 14px; background: none; color: var(--text); }
+.sort-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.sort-bar span { font-size: 14px; color: var(--text2); font-weight: 500; }
+.sort-bar select { border: 1.5px solid var(--border); background: var(--surface); border-radius: var(--radius-sm); padding: 7px 12px; font-size: 13px; outline: none; color: var(--text); }
+.workers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.worker-card {
+  background: var(--surface); border-radius: var(--radius);
+  box-shadow: var(--shadow); overflow: hidden;
+  transition: var(--transition); cursor: pointer;
+}
+.worker-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.wc-header { padding: 20px 20px 0; display: flex; align-items: flex-start; gap: 14px; }
+.wc-avatar {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.wc-name { font-family: var(--font-head); font-size: 17px; font-weight: 700; }
+.wc-category { font-size: 13px; color: var(--text2); margin: 2px 0; }
+.wc-verified { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--teal); font-weight: 600; }
+.wc-body { padding: 14px 20px; }
+.wc-stats { display: flex; gap: 16px; margin-bottom: 12px; }
+.wc-stat { }
+.wc-stat-val { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--text); }
+.wc-stat-lab { font-size: 11px; color: var(--text3); }
+.wc-rate { font-size: 14px; font-weight: 600; color: var(--text); }
+.wc-rate span { color: var(--text2); font-weight: 400; }
+.wc-skills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.skill-tag { background: var(--surface3); color: var(--text2); font-size: 11px; padding: 3px 10px; border-radius: 50px; }
+.wc-footer { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid var(--border); }
+.wc-avail { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+
+/* ===== WORKER PROFILE ===== */
+.profile-hero { background: var(--brand); padding: 40px 20px; }
+.profile-hero-inner { max-width: 1000px; margin: 0 auto; display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+.profile-avatar {
+  width: 90px; height: 90px; border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; font-weight: 800; color: #fff;
+  border: 3px solid rgba(255,255,255,0.2);
+}
+.profile-info { flex: 1; }
+.profile-name { font-size: 32px; font-weight: 800; color: #fff; }
+.profile-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.profile-cat { color: rgba(255,255,255,0.7); font-size: 15px; }
+.profile-actions { margin-top: 8px; display: flex; gap: 10px; }
+.profile-body { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+.profile-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+.info-card { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+.info-card-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat-box { background: var(--surface2); border-radius: var(--radius-sm); padding: 16px; text-align: center; }
+.stat-box-val { font-family: var(--font-head); font-size: 24px; font-weight: 800; color: var(--text); }
+.stat-box-lab { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* ===== CALENDAR ===== */
+.calendar-wrap { }
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cal-title { font-size: 16px; font-weight: 700; }
+.cal-nav { background: none; border: 1.5px solid var(--border); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+.cal-nav:hover { border-color: var(--accent); color: var(--accent); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-day-name { text-align: center; font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; padding: 4px 0; }
+.cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: var(--transition); color: var(--text);
+}
+.cal-day:hover:not(.unavail):not(.past) { background: rgba(233,69,96,0.08); color: var(--accent); }
+.cal-day.today { background: var(--brand); color: #fff; font-weight: 700; }
+.cal-day.unavail { background: rgba(233,69,96,0.1); color: var(--accent); text-decoration: line-through; cursor: not-allowed; }
+.cal-day.selected { background: var(--accent); color: #fff; }
+.cal-day.past { color: var(--text3); cursor: not-allowed; }
+.cal-day.empty { }
+.cal-legend { display: flex; gap: 16px; margin-top: 12px; }
+.cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+.cal-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.slots-section { margin-top: 16px; }
+.slots-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--text2); }
+.slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.slot-btn {
+  padding: 8px 4px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer;
+  transition: var(--transition); text-align: center;
+}
+.slot-btn:hover { border-color: var(--accent); color: var(--accent); }
+.slot-btn.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+.slot-btn.booked { background: var(--surface3); color: var(--text3); cursor: not-allowed; border-style: dashed; }
+
+/* ===== REVIEWS ===== */
+.review-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
+.review-item:last-child { border-bottom: none; }
+.review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.review-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.review-name { font-weight: 600; font-size: 14px; }
+.review-date { font-size: 12px; color: var(--text3); }
+.review-text { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+/* ===== DASHBOARDS ===== */
+.dashboard-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 64px); }
+.sidebar {
+  background: var(--brand); color: #fff; padding: 24px 16px;
+  position: sticky; top: 64px; height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+.sidebar-section { margin-bottom: 28px; }
+.sidebar-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); margin-bottom: 8px; padding: 0 10px; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--transition);
+  color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500;
+  margin-bottom: 2px;
+}
+.sidebar-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.sidebar-item.active { background: var(--accent); color: #fff; }
+.sidebar-item-icon { font-size: 18px; flex-shrink: 0; }
+.dash-content { padding: 30px; overflow-y: auto; }
+.dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.dash-title { font-size: 24px; font-weight: 800; }
+.dash-sub { color: var(--text2); font-size: 14px; margin-top: 2px; }
+.stats-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow);
+}
+.stat-card-icon { font-size: 28px; margin-bottom: 12px; }
+.stat-card-val { font-family: var(--font-head); font-size: 28px; font-weight: 800; color: var(--text); }
+.stat-card-label { font-size: 13px; color: var(--text2); margin-top: 2px; }
+.stat-card-change { font-size: 12px; font-weight: 600; margin-top: 6px; }
+.stat-card-change.up { color: var(--teal); }
+.stat-card-change.down { color: var(--accent); }
+.data-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.data-table th { background: var(--surface2); padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); border-bottom: 1px solid var(--border); }
+.data-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--surface2); }
+.section-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
+.section-card-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+.section-card-title { font-size: 16px; font-weight: 700; }
+.section-card-body { padding: 24px; }
+
+/* ===== AI CHATBOT ===== */
+.chat-fab {
+  position: fixed; bottom: 24px; right: 24px; z-index: 300;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--brand); color: #fff;
+  box-shadow: 0 4px 20px rgba(26,26,46,0.3);
+  border: none; font-size: 24px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.chat-fab:hover { transform: scale(1.1); background: var(--accent); }
+.chat-window {
+  position: fixed; bottom: 90px; right: 24px; z-index: 300;
+  width: 360px; height: 520px;
+  background: var(--surface); border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  display: none; flex-direction: column; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.chat-window.open { display: flex; }
+.chat-header {
+  background: var(--brand); padding: 16px 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.chat-header-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.chat-header-name { font-weight: 700; color: #fff; font-size: 15px; }
+.chat-header-status { font-size: 11px; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 4px; }
+.chat-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+.chat-close { margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.7); font-size: 20px; cursor: pointer; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.chat-msg { max-width: 85%; }
+.chat-msg.bot { align-self: flex-start; }
+.chat-msg.user { align-self: flex-end; }
+.chat-bubble {
+  padding: 10px 14px; border-radius: 16px;
+  font-size: 13px; line-height: 1.6;
+}
+.chat-msg.bot .chat-bubble { background: var(--surface2); color: var(--text); border-bottom-left-radius: 4px; }
+.chat-msg.user .chat-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+.chat-quick { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 16px 8px; }
+.chat-quick-btn {
+  font-size: 11px; padding: 5px 10px; border-radius: 50px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text2); cursor: pointer; transition: var(--transition);
+}
+.chat-quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+.chat-input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.chat-input {
+  flex: 1; padding: 9px 12px; border: 1.5px solid var(--border);
+  border-radius: 50px; font-size: 13px; outline: none;
+  background: var(--surface2); color: var(--text);
+}
+.chat-input:focus { border-color: var(--accent); }
+.chat-send {
+  background: var(--accent); color: #fff; border: none;
+  width: 36px; height: 36px; border-radius: 50%; font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: var(--transition); flex-shrink: 0;
+}
+.chat-send:hover { background: #c73550; }
+.chat-typing { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
+.typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: typingBounce 1.2s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce { 0%,60%,100%{transform:none} 30%{transform:translateY(-6px)} }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hamburger { display: block; }
+  .hero-inner { grid-template-columns: 1fr; gap: 30px; }
+  .hero-visual { display: none; }
+  .how-grid { grid-template-columns: 1fr; }
+  .listings-layout { grid-template-columns: 1fr; }
+  .filters-sidebar { position: static; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .dashboard-layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid.cols3 { grid-template-columns: 1fr; }
+  .stats-cards { grid-template-columns: repeat(2, 1fr); }
+  .chat-window { width: calc(100vw - 32px); right: 16px; bottom: 80px; }
+  .hero-stats { gap: 20px; }
+}
+@media (max-width: 480px) {
+  .stats-cards { grid-template-columns: 1fr; }
+  .slots-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+.tab-btn { padding: 10px 18px; background: none; border: none; font-size: 14px; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: var(--transition); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* Misc */
+.empty-state { text-align: center; padding: 48px 20px; color: var(--text2); }
+.empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state-text { font-size: 16px; font-weight: 600; color: var(--text); }
+.empty-state-sub { font-size: 14px; margin-top: 6px; }
+.loading { display: flex; align-items: center; justify-content: center; padding: 40px; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.back-btn { display: flex; align-items: center; gap: 6px; color: var(--text2); font-size: 14px; cursor: pointer; margin-bottom: 20px; transition: var(--transition); background: none; border: none; }
+.back-btn:hover { color: var(--accent); }
+
+/* Booking confirmation */
+.booking-confirm { text-align: center; padding: 32px 24px; }
+.booking-confirm-icon { font-size: 64px; margin-bottom: 16px; }
+.booking-confirm-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.booking-confirm-sub { color: var(--text2); font-size: 15px; }
+.booking-details-box { background: var(--surface2); border-radius: var(--radius); padding: 20px; margin: 20px 0; text-align: left; }
+.booking-detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.booking-detail-row:last-child { border-bottom: none; }
+.booking-detail-label { color: var(--text2); }
+.booking-detail-val { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- NAVBAR -->
+<nav id="main-nav" style="display:none">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="navigateTo('landing')">
+      <div class="nav-logo-icon">⚡</div>
+      Work<span>Book</span>
+    </div>
+    <div class="nav-links">
+      <button onclick="navigateTo('listings')">Find Workers</button>
+      <button onclick="navigateTo('how')">How It Works</button>
+    </div>
+    <div class="nav-actions">
+      <div id="nav-user-area"></div>
+    </div>
+    <button class="hamburger" onclick="toggleMobileMenu()">☰</button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-menu-close" onclick="toggleMobileMenu()">✕</button>
+  <button onclick="navigateTo('listings');toggleMobileMenu()">Find Workers</button>
+  <button onclick="navigateTo('landing');toggleMobileMenu()">How It Works</button>
+  <button onclick="navigateTo('auth');toggleMobileMenu()">Login / Sign Up</button>
+</div>
+
+<!-- AI CHATBOT FAB -->
+<button class="chat-fab" id="chat-fab" onclick="toggleChat()" title="AI Assistant">🤖</button>
+<div class="chat-window" id="chat-window">
+  <div class="chat-header">
+    <div class="chat-header-avatar">🤖</div>
+    <div>
+      <div class="chat-header-name">WorkBook AI</div>
+      <div class="chat-header-status"><span class="chat-status-dot"></span>Always here to help</div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-quick" id="chat-quick-btns"></div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chat-input" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- ================== PAGES ================== -->
+
+<!-- LANDING PAGE -->
+<div class="page" id="page-landing">
+  <div class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow">🏆 #1 Worker Booking Platform in India</div>
+        <h1>Find <em>Trusted</em><br>Home Service<br>Experts</h1>
+        <p class="hero-sub">Book verified plumbers, electricians, carpenters, and 20+ skilled professionals instantly. Real reviews, real people, real results.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary btn-lg" onclick="navigateTo('listings')">🔍 Find a Worker</button>
+          <button class="btn btn-outline btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="navigateTo('auth')">Join as Worker</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="hero-stat-num">2,400+</div><div class="hero-stat-label">Verified Workers</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">18k+</div><div class="hero-stat-label">Bookings Done</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">4.8★</div><div class="hero-stat-label">Avg Rating</div></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card-stack">
+          <div class="hero-card-float hcf-main">
+            <div class="hero-worker-info">
+              <div class="hero-worker-avatar" style="background:#e94560">RS</div>
+              <div>
+                <div class="hero-worker-name">Rajesh Singh</div>
+                <div class="hero-worker-cat">⚡ Electrician · Koramangala</div>
+              </div>
+            </div>
+            <div class="hero-chips">
+              <span class="hero-chip">✅ Verified</span>
+              <span class="hero-chip">⭐ 4.9</span>
+              <span class="hero-chip">142 reviews</span>
+              <span class="hero-chip">₹350/hr</span>
+            </div>
+          </div>
+          <div class="hero-card-float hcf-rating">
+            <div class="hcf-rating-num">4.9</div>
+            <div class="stars">★★★★★</div>
+            <div class="hcf-rating-label">120 reviews</div>
+          </div>
+          <div class="hero-card-float hcf-avail">
+            <div class="hcf-avail-dot">
+              <div class="dot-green"></div>
+              <div class="hcf-avail-text">Available Today</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="background:var(--surface)">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-eyebrow">Browse by Category</div>
+        <h2 class="section-title">Every Home Service You Need</h2>
+        <p class="section-sub">From emergency plumbing to solar panel installation</p>
+      </div>
+      <div class="categories-grid" id="landing-categories"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-eyebrow">Simple Process</div>
+        <h2 class="section-title">Book in 3 Easy Steps</h2>
+      </div>
+      <div class="how-grid">
+        <div class="how-step">
+          <div class="how-num">1</div>
+          <h3 class="how-title">Search & Filter</h3>
+          <p class="how-desc">Browse workers by category, location, rating, and availability. Our AI assistant helps you find the perfect match.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num">2</div>
+          <h3 class="how-title">Pick a Slot</h3>
+          <p class="how-desc">View the worker's live calendar and select a convenient time. No back-and-forth calls needed.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num">3</div>
+          <h3 class="how-title">Get it Done</h3>
+          <p class="how-desc">Worker arrives, completes the job, and you leave an honest review. Your safety is guaranteed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH PAGE -->
+<div class="page" id="page-auth">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">⚡</div>
+        <h2 class="auth-title">Welcome to WorkBook</h2>
+        <p class="auth-sub">Connect with skilled professionals</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Sign Up</button>
+      </div>
+      <div id="auth-login-form" class="auth-form">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-control" type="email" id="login-email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-control" type="password" id="login-password" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="doLogin()">Sign In →</button>
+        <div class="auth-divider">Quick Demo Access</div>
+        <div class="demo-creds">
+          <h4>Demo Credentials</h4>
+          <div class="demo-cred-row"><span>Admin:</span> <b>admin@workbook.com / admin123</b></div>
+          <div class="demo-cred-row"><span>Customer:</span> <b>customer@workbook.com / pass123</b></div>
+          <div class="demo-cred-row"><span>Worker:</span> <b>worker@workbook.com / pass123</b></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="quickLogin('admin@workbook.com','admin123')">🔑 Admin Demo</button>
+          <button class="btn btn-secondary btn-sm" onclick="quickLogin('customer@workbook.com','pass123')">👤 Customer Demo</button>
+          <button class="btn btn-secondary btn-sm" onclick="quickLogin('worker@workbook.com','pass123')">👷 Worker Demo</button>
+        </div>
+      </div>
+      <div id="auth-register-form" class="auth-form" style="display:none">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-control" id="reg-fname" placeholder="John">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-control" id="reg-lname" placeholder="Doe">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-control" type="email" id="reg-email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-control" id="reg-phone" placeholder="+91 9876543210">
+        </div>
+        <div class="form-group">
+          <label class="form-label">I want to</label>
+          <select class="form-control" id="reg-role">
+            <option value="customer">Book Services (Customer)</option>
+            <option value="worker">Offer Services (Worker)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-control" type="password" id="reg-password" placeholder="Min. 6 characters">
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="doRegister()">Create Account →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WORKER LISTINGS -->
+<div class="page" id="page-listings">
+  <div class="container" style="padding-top:20px">
+    <div class="search-bar">
+      <span style="font-size:18px">🔍</span>
+      <input id="search-input" placeholder="Search by name, skill, or location..." oninput="filterWorkers()">
+      <button class="btn btn-primary btn-sm" onclick="filterWorkers()">Search</button>
+    </div>
+  </div>
+  <div class="listings-layout">
+    <aside class="filters-sidebar">
+      <div class="filter-card">
+        <div class="filter-title">Filters</div>
+        <div class="filter-section">
+          <div class="filter-section-label">Category</div>
+          <div class="filter-options" id="category-filters"></div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-section-label">Min Rating</div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="radio" name="rating" value="0" checked onchange="filterWorkers()"> All</label>
+            <label class="filter-option"><input type="radio" name="rating" value="4" onchange="filterWorkers()"> 4+ ★</label>
+            <label class="filter-option"><input type="radio" name="rating" value="4.5" onchange="filterWorkers()"> 4.5+ ★</label>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-section-label">Availability</div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="checkbox" id="avail-today" onchange="filterWorkers()"> Available today</label>
+            <label class="filter-option"><input type="checkbox" id="verified-only" onchange="filterWorkers()"> Verified only</label>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm btn-block" onclick="clearFilters()" style="border-radius:var(--radius-sm)">Clear Filters</button>
+      </div>
+    </aside>
+    <main>
+      <div class="sort-bar">
+        <span id="worker-count">Loading...</span>
+        <select onchange="sortWorkers(this.value)" id="sort-select">
+          <option value="rating">Sort: Best Rated</option>
+          <option value="rate_low">Sort: Price ↑</option>
+          <option value="rate_high">Sort: Price ↓</option>
+          <option value="reviews">Sort: Most Reviews</option>
+        </select>
+      </div>
+      <div class="workers-grid" id="workers-grid"></div>
+    </main>
+  </div>
+</div>
+
+<!-- WORKER PROFILE -->
+<div class="page" id="page-profile">
+  <div id="profile-content"></div>
+</div>
+
+<!-- CUSTOMER DASHBOARD -->
+<div class="page" id="page-customer-dash">
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Menu</div>
+        <div class="sidebar-item active" onclick="custDashTab('overview')"><span class="sidebar-item-icon">🏠</span> Overview</div>
+        <div class="sidebar-item" onclick="custDashTab('bookings')"><span class="sidebar-item-icon">📋</span> My Bookings</div>
+        <div class="sidebar-item" onclick="custDashTab('reviews')"><span class="sidebar-item-icon">⭐</span> My Reviews</div>
+        <div class="sidebar-item" onclick="custDashTab('profile')"><span class="sidebar-item-icon">👤</span> Profile</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-item" onclick="navigateTo('listings')"><span class="sidebar-item-icon">🔍</span> Find Workers</div>
+        <div class="sidebar-item" onclick="doLogout()"><span class="sidebar-item-icon">🚪</span> Logout</div>
+      </div>
+    </aside>
+    <div class="dash-content" id="cust-dash-content"></div>
+  </div>
+</div>
+
+<!-- WORKER DASHBOARD -->
+<div class="page" id="page-worker-dash">
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Menu</div>
+        <div class="sidebar-item active" onclick="workerDashTab('overview')"><span class="sidebar-item-icon">🏠</span> Overview</div>
+        <div class="sidebar-item" onclick="workerDashTab('bookings')"><span class="sidebar-item-icon">📋</span> My Bookings</div>
+        <div class="sidebar-item" onclick="workerDashTab('availability')"><span class="sidebar-item-icon">📅</span> Availability</div>
+        <div class="sidebar-item" onclick="workerDashTab('profile')"><span class="sidebar-item-icon">👤</span> My Profile</div>
+        <div class="sidebar-item" onclick="workerDashTab('reviews')"><span class="sidebar-item-icon">⭐</span> Reviews</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-item" onclick="doLogout()"><span class="sidebar-item-icon">🚪</span> Logout</div>
+      </div>
+    </aside>
+    <div class="dash-content" id="worker-dash-content"></div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="page" id="page-admin-dash">
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Admin Panel</div>
+        <div class="sidebar-item active" onclick="adminDashTab('overview')"><span class="sidebar-item-icon">📊</span> Overview</div>
+        <div class="sidebar-item" onclick="adminDashTab('workers')"><span class="sidebar-item-icon">👷</span> Workers</div>
+        <div class="sidebar-item" onclick="adminDashTab('bookings')"><span class="sidebar-item-icon">📋</span> Bookings</div>
+        <div class="sidebar-item" onclick="adminDashTab('customers')"><span class="sidebar-item-icon">👥</span> Customers</div>
+        <div class="sidebar-item" onclick="adminDashTab('reviews')"><span class="sidebar-item-icon">⭐</span> Reviews</div>
+        <div class="sidebar-item" onclick="adminDashTab('categories')"><span class="sidebar-item-icon">🏷️</span> Categories</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-item" onclick="doLogout()"><span class="sidebar-item-icon">🚪</span> Logout</div>
+      </div>
+    </aside>
+    <div class="dash-content" id="admin-dash-content"></div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📅 Book Appointment</div>
+      <button class="modal-close" onclick="closeModal('booking-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="booking-modal-body"></div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⭐ Leave a Review</div>
+      <button class="modal-close" onclick="closeModal('review-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="review-modal-body"></div>
+  </div>
+</div>
+
+<!-- WORKER EDIT MODAL -->
+<div class="modal-overlay" id="worker-edit-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Edit Profile</div>
+      <button class="modal-close" onclick="closeModal('worker-edit-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="worker-edit-body"></div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// DATA STORE (simulated backend)
+// ================================================================
+const DB = {
+  users: [
+    { id:'u1', name:'Admin User', email:'admin@workbook.com', password:'admin123', role:'admin', phone:'9000000000', avatar:'AU', avatarColor:'#e94560' },
+    { id:'u2', name:'Priya Sharma', email:'customer@workbook.com', password:'pass123', role:'customer', phone:'9876543210', avatar:'PS', avatarColor:'#7c3aed' },
+    { id:'u3', name:'Rajesh Singh', email:'worker@workbook.com', password:'pass123', role:'worker', phone:'9123456789', avatar:'RS', avatarColor:'#e94560', workerId:'w1' }
+  ],
+  categories: [
+    { id:'c1', name:'Plumber', icon:'🔧', color:'#2563eb', count:18 },
+    { id:'c2', name:'Electrician', icon:'⚡', color:'#f59e0b', count:24 },
+    { id:'c3', name:'Carpenter', icon:'🪚', color:'#92400e', count:14 },
+    { id:'c4', name:'Painter', icon:'🎨', color:'#7c3aed', count:11 },
+    { id:'c5', name:'Solar Panel', icon:'☀️', color:'#f97316', count:8 },
+    { id:'c6', name:'AC Repair', icon:'❄️', color:'#0ea5e9', count:16 },
+    { id:'c7', name:'Gardener', icon:'🌿', color:'#16a34a', count:9 },
+    { id:'c8', name:'Cleaner', icon:'🧹', color:'#0d9488', count:20 },
+    { id:'c9', name:'Appliance Repair', icon:'🔌', color:'#dc2626', count:13 },
+    { id:'c10', name:'Security', icon:'🔐', color:'#374151', count:7 },
+    { id:'c11', name:'Mason', icon:'🏗️', color:'#78716c', count:12 },
+    { id:'c12', name:'Pest Control', icon:'🐛', color:'#65a30d', count:6 }
+  ],
+  workers: [
+    { id:'w1', userId:'u3', name:'Rajesh Singh', category:'Electrician', categoryId:'c2', bio:'15 years of electrical experience. Specializing in residential wiring, panel upgrades, and smart home installations. Available on short notice.', hourlyRate:350, rating:4.9, reviewCount:142, completedJobs:1240, verified:true, phone:'9123456789', email:'worker@workbook.com', avatar:'RS', avatarColor:'#e94560', skills:['Wiring','Panel Upgrade','Smart Home','Emergency'], location:'Koramangala, Bangalore', unavailableDates:['2026-04-10','2026-04-11','2026-04-20'] },
+    { id:'w2', userId:'u10', name:'Anita Kumar', category:'Plumber', categoryId:'c1', bio:'Expert plumber with 10 years experience. Handles pipe fitting, leaks, bathroom installation and more.', hourlyRate:280, rating:4.7, reviewCount:98, completedJobs:820, verified:true, phone:'9234567890', email:'anita@example.com', avatar:'AK', avatarColor:'#0ea5e9', skills:['Pipe Fitting','Leak Repair','Bathroom Install','Drainage'], location:'Indiranagar, Bangalore', unavailableDates:['2026-04-15'] },
+    { id:'w3', userId:'u11', name:'Mohammed Farhan', category:'Carpenter', categoryId:'c3', bio:'Custom furniture and woodwork specialist. 12 years crafting beautiful, durable pieces for homes.', hourlyRate:400, rating:4.8, reviewCount:76, completedJobs:640, verified:true, phone:'9345678901', email:'farhan@example.com', avatar:'MF', avatarColor:'#92400e', skills:['Custom Furniture','Doors','Repairs','Modular Kitchen'], location:'Whitefield, Bangalore', unavailableDates:[] },
+    { id:'w4', userId:'u12', name:'Sunita Devi', category:'Cleaner', categoryId:'c8', bio:'Professional home and office cleaning. Deep cleaning, regular maintenance, post-construction cleanup.', hourlyRate:180, rating:4.6, reviewCount:203, completedJobs:1800, verified:true, phone:'9456789012', email:'sunita@example.com', avatar:'SD', avatarColor:'#0d9488', skills:['Deep Clean','Sanitization','Office','Post-Construction'], location:'HSR Layout, Bangalore', unavailableDates:['2026-04-12','2026-04-13'] },
+    { id:'w5', userId:'u13', name:'Vikram Nair', category:'AC Repair', categoryId:'c6', bio:'Certified AC technician. Installation, servicing, gas refilling for all brands. 24/7 emergency support.', hourlyRate:500, rating:4.9, reviewCount:167, completedJobs:1450, verified:true, phone:'9567890123', email:'vikram@example.com', avatar:'VN', avatarColor:'#0ea5e9', skills:['Installation','Servicing','Gas Refill','All Brands'], location:'Electronic City, Bangalore', unavailableDates:[] },
+    { id:'w6', userId:'u14', name:'Ravi Patel', category:'Painter', categoryId:'c4', bio:'Interior and exterior painting expert. Texture work, waterproofing, and decorative finishes.', hourlyRate:300, rating:4.5, reviewCount:55, completedJobs:430, verified:false, phone:'9678901234', email:'ravi@example.com', avatar:'RP', avatarColor:'#7c3aed', skills:['Interior','Exterior','Texture','Waterproofing'], location:'Jayanagar, Bangalore', unavailableDates:[] },
+    { id:'w7', userId:'u15', name:'Lakshmi Bai', category:'Solar Panel', categoryId:'c5', bio:'Certified solar panel installer and maintenance expert. 8 years in renewable energy sector.', hourlyRate:600, rating:4.8, reviewCount:42, completedJobs:280, verified:true, phone:'9789012345', email:'lakshmi@example.com', avatar:'LB', avatarColor:'#f97316', skills:['Installation','Maintenance','Battery','Grid Tie'], location:'Marathahalli, Bangalore', unavailableDates:['2026-04-18','2026-04-19'] },
+    { id:'w8', userId:'u16', name:'Kiran Reddy', category:'Appliance Repair', categoryId:'c9', bio:'Multi-brand appliance technician. Washing machines, refrigerators, microwaves, dishwashers.', hourlyRate:320, rating:4.7, reviewCount:118, completedJobs:950, verified:true, phone:'9890123456', email:'kiran@example.com', avatar:'KR', avatarColor:'#dc2626', skills:['Washing Machine','Refrigerator','Microwave','Dishwasher'], location:'BTM Layout, Bangalore', unavailableDates:[] }
+  ],
+  bookings: [
+    { id:'b1', customerId:'u2', workerId:'w1', date:'2026-04-05', slot:'10:00 AM', status:'confirmed', address:'12, 5th Cross, Koramangala', amount:700, reviewed:true, workerName:'Rajesh Singh', customerName:'Priya Sharma', category:'Electrician' },
+    { id:'b2', customerId:'u2', workerId:'w2', date:'2026-04-08', slot:'02:00 PM', status:'pending', address:'12, 5th Cross, Koramangala', amount:560, reviewed:false, workerName:'Anita Kumar', customerName:'Priya Sharma', category:'Plumber' },
+    { id:'b3', customerId:'u2', workerId:'w5', date:'2026-03-20', slot:'11:00 AM', status:'completed', address:'12, 5th Cross, Koramangala', amount:1000, reviewed:false, workerName:'Vikram Nair', customerName:'Priya Sharma', category:'AC Repair' },
+    { id:'b4', customerId:'u17', workerId:'w1', date:'2026-04-06', slot:'09:00 AM', status:'confirmed', address:'45, 8th Main, Indiranagar', amount:700, reviewed:false, workerName:'Rajesh Singh', customerName:'Deepak R', category:'Electrician' },
+  ],
+  reviews: [
+    { id:'r1', workerId:'w1', customerId:'u2', customerName:'Priya S', rating:5, comment:'Rajesh was excellent! Fixed my electrical issue in under an hour. Very professional and clean work.', date:'2026-03-15', avatarColor:'#7c3aed' },
+    { id:'r2', workerId:'w1', customerId:'u17', customerName:'Arjun M', rating:5, comment:'Very knowledgeable. Identified the root cause of our power fluctuation immediately. Highly recommend!', date:'2026-03-10', avatarColor:'#16a34a' },
+    { id:'r3', workerId:'w1', customerId:'u18', customerName:'Kavitha R', rating:4, comment:'Good work, arrived on time. Slightly expensive but quality was top notch.', date:'2026-02-28', avatarColor:'#f97316' },
+    { id:'r4', workerId:'w2', customerId:'u2', customerName:'Priya S', rating:5, comment:'Anita fixed our bathroom pipe in no time. Very neat and professional.', date:'2026-03-05', avatarColor:'#7c3aed' },
+    { id:'r5', workerId:'w2', customerId:'u19', customerName:'Suresh K', rating:4, comment:'Good plumber, reasonable rates. Would book again.', date:'2026-02-20', avatarColor:'#e94560' },
+  ],
+  nextId: 100
+};
+
+// ================================================================
+// AUTH STATE
+// ================================================================
+let currentUser = null;
+
+function getCurrentUser() { return currentUser; }
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const user = DB.users.find(u => u.email === email && u.password === pass);
+  if (!user) { showToast('Invalid email or password', 'error'); return; }
+  loginUser(user);
+}
+
+function quickLogin(email, pass) {
+  document.getElementById('login-email').value = email;
+  document.getElementById('login-password').value = pass;
+  doLogin();
+}
+
+function loginUser(user) {
+  currentUser = user;
+  showToast(`Welcome back, ${user.name.split(' ')[0]}! 👋`, 'success');
+  updateNavUser();
+  if (user.role === 'admin') navigateTo('admin-dash');
+  else if (user.role === 'worker') navigateTo('worker-dash');
+  else navigateTo('customer-dash');
+}
+
+function doRegister() {
+  const fname = document.getElementById('reg-fname').value.trim();
+  const lname = document.getElementById('reg-lname').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const role = document.getElementById('reg-role').value;
+  const pass = document.getElementById('reg-password').value;
+  if (!fname || !email || !pass) { showToast('Please fill all required fields', 'error'); return; }
+  if (DB.users.find(u => u.email === email)) { showToast('Email already registered', 'error'); return; }
+  const id = 'u' + (++DB.nextId);
+  const initials = (fname[0]+(lname?lname[0]:'')).toUpperCase();
+  const colors = ['#e94560','#7c3aed','#0ea5e9','#16a34a','#f97316','#0d9488'];
+  const user = { id, name:`${fname} ${lname}`.trim(), email, password:pass, role, phone, avatar:initials, avatarColor:colors[DB.nextId%colors.length] };
+  DB.users.push(user);
+  if (role === 'worker') {
+    const wid = 'w' + (++DB.nextId);
+    user.workerId = wid;
+    DB.workers.push({ id:wid, userId:id, name:user.name, category:'General', categoryId:'c1', bio:'', hourlyRate:300, rating:0, reviewCount:0, completedJobs:0, verified:false, phone, email, avatar:initials, avatarColor:user.avatarColor, skills:[], location:'Bangalore', unavailableDates:[] });
+  }
+  loginUser(user);
+}
+
+function doLogout() {
+  currentUser = null;
+  updateNavUser();
+  navigateTo('landing');
+  showToast('Logged out successfully', 'info');
+}
+
+function updateNavUser() {
+  const area = document.getElementById('nav-user-area');
+  if (!currentUser) {
+    area.innerHTML = `<button class="btn-nav-login" onclick="navigateTo('auth')">Login</button>
+    <button class="btn-nav-cta" onclick="navigateTo('auth')">Sign Up</button>`;
+  } else {
+    area.innerHTML = `<div class="user-pill" onclick="goDashboard()">
+      <div class="user-avatar" style="background:${currentUser.avatarColor}">${currentUser.avatar}</div>
+      <div><div class="user-pill-name">${currentUser.name.split(' ')[0]}</div><div class="user-pill-role">${currentUser.role}</div></div>
+    </div>`;
+  }
+}
+
+function goDashboard() {
+  if (!currentUser) return navigateTo('auth');
+  if (currentUser.role === 'admin') navigateTo('admin-dash');
+  else if (currentUser.role === 'worker') navigateTo('worker-dash');
+  else navigateTo('customer-dash');
+}
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page.replace(/-/g, '-'));
+  if (!el) return;
+  el.classList.add('active');
+  window.scrollTo(0, 0);
+  const nav = document.getElementById('main-nav');
+  nav.style.display = (page === 'auth') ? 'none' : 'block';
+  // Initialize page content
+  if (page === 'listings') renderWorkerListings();
+  else if (page === 'landing') renderLandingCategories();
+  else if (page === 'customer-dash') { renderCustomerDash(); custDashTab('overview'); }
+  else if (page === 'worker-dash') { renderWorkerDash(); workerDashTab('overview'); }
+  else if (page === 'admin-dash') { renderAdminDash(); adminDashTab('overview'); }
+}
+
+// ================================================================
+// LANDING PAGE
+// ================================================================
+function renderLandingCategories() {
+  const el = document.getElementById('landing-categories');
+  if (!el) return;
+  el.innerHTML = DB.categories.map(c => `
+    <div class="category-card" onclick="filterByCategory('${c.id}');navigateTo('listings')">
+      <div class="category-icon">${c.icon}</div>
+      <div class="category-name">${c.name}</div>
+      <div class="category-count">${c.count} workers</div>
+    </div>`).join('');
+}
+
+let activeCategoryFilter = 'all';
+function filterByCategory(id) { activeCategoryFilter = id; }
+
+// ================================================================
+// WORKER LISTINGS
+// ================================================================
+function renderWorkerListings() {
+  renderCategoryFilters();
+  filterWorkers();
+}
+
+function renderCategoryFilters() {
+  const el = document.getElementById('category-filters');
+  if (!el) return;
+  el.innerHTML = `<label class="filter-option"><input type="radio" name="cat" value="all" ${activeCategoryFilter==='all'?'checked':''} onchange="activeCategoryFilter='all';filterWorkers()"> All Categories</label>` +
+    DB.categories.map(c => `<label class="filter-option"><input type="radio" name="cat" value="${c.id}" ${activeCategoryFilter===c.id?'checked':''} onchange="activeCategoryFilter='${c.id}';filterWorkers()"> ${c.icon} ${c.name}</label>`).join('');
+}
+
+function filterWorkers() {
+  let workers = [...DB.workers];
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const minRating = parseFloat(document.querySelector('input[name="rating"]:checked')?.value||0);
+  const availToday = document.getElementById('avail-today')?.checked;
+  const verifiedOnly = document.getElementById('verified-only')?.checked;
+  const selCat = document.querySelector('input[name="cat"]:checked')?.value || activeCategoryFilter || 'all';
+  if (q) workers = workers.filter(w => w.name.toLowerCase().includes(q)||w.category.toLowerCase().includes(q)||w.skills.some(s=>s.toLowerCase().includes(q))||w.location.toLowerCase().includes(q));
+  if (selCat !== 'all') workers = workers.filter(w => w.categoryId === selCat);
+  if (minRating > 0) workers = workers.filter(w => w.rating >= minRating);
+  if (verifiedOnly) workers = workers.filter(w => w.verified);
+  if (availToday) { const today = getTodayStr(); workers = workers.filter(w => !w.unavailableDates.includes(today)); }
+  sortWorkers(document.getElementById('sort-select')?.value||'rating', workers);
+  document.getElementById('worker-count').textContent = `${workers.length} worker${workers.length!==1?'s':''} found`;
+}
+
+function sortWorkers(by, workers) {
+  if (!workers) {
+    workers = [...DB.workers];
+    filterWorkers();
+    return;
+  }
+  if (by === 'rating') workers.sort((a,b) => b.rating - a.rating);
+  else if (by === 'rate_low') workers.sort((a,b) => a.hourlyRate - b.hourlyRate);
+  else if (by === 'rate_high') workers.sort((a,b) => b.hourlyRate - a.hourlyRate);
+  else if (by === 'reviews') workers.sort((a,b) => b.reviewCount - a.reviewCount);
+  renderWorkersGrid(workers);
+}
+
+function renderWorkersGrid(workers) {
+  const el = document.getElementById('workers-grid');
+  if (!el) return;
+  if (!workers.length) { el.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">😔</div><div class="empty-state-text">No workers found</div><div class="empty-state-sub">Try adjusting your filters</div></div>`; return; }
+  el.innerHTML = workers.map(w => `
+    <div class="worker-card" onclick="showWorkerProfile('${w.id}')">
+      <div class="wc-header">
+        <div class="wc-avatar" style="background:${w.avatarColor}">${w.avatar}</div>
+        <div>
+          <div class="wc-name">${w.name}</div>
+          <div class="wc-category">${getCatIcon(w.categoryId)} ${w.category}</div>
+          ${w.verified?'<div class="wc-verified">✅ Verified</div>':'<div class="wc-verified" style="color:#f59e0b">⏳ Pending</div>'}
+        </div>
+      </div>
+      <div class="wc-body">
+        <div class="wc-stats">
+          <div class="wc-stat"><div class="wc-stat-val">${w.rating>0?w.rating.toFixed(1):'—'}</div><div class="wc-stat-lab">Rating</div></div>
+          <div class="wc-stat"><div class="wc-stat-val">${w.reviewCount}</div><div class="wc-stat-lab">Reviews</div></div>
+          <div class="wc-stat"><div class="wc-stat-val">${w.completedJobs}</div><div class="wc-stat-lab">Jobs Done</div></div>
+        </div>
+        <div class="wc-rate">₹${w.hourlyRate}<span>/hour</span></div>
+        <div class="wc-skills">${w.skills.slice(0,3).map(s=>`<span class="skill-tag">${s}</span>`).join('')}${w.skills.length>3?`<span class="skill-tag">+${w.skills.length-3}</span>`:''}</div>
+      </div>
+      <div class="wc-footer">
+        <div class="wc-avail">${isAvailToday(w)?'<span style="color:#22c55e">●</span> Available':'<span style="color:#f59e0b">●</span> Check dates'}</div>
+        <div class="stars">${renderStars(w.rating)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function clearFilters() {
+  activeCategoryFilter = 'all';
+  document.getElementById('search-input').value = '';
+  document.getElementById('avail-today').checked = false;
+  document.getElementById('verified-only').checked = false;
+  document.querySelectorAll('input[name="rating"]')[0].checked = true;
+  renderCategoryFilters();
+  filterWorkers();
+}
+
+// ================================================================
+// WORKER PROFILE
+// ================================================================
+let currentWorker = null;
+let selectedDate = null;
+let selectedSlot = null;
+
+function showWorkerProfile(workerId) {
+  currentWorker = DB.workers.find(w => w.id === workerId);
+  if (!currentWorker) return;
+  selectedDate = null; selectedSlot = null;
+  renderProfile();
+  navigateTo('profile');
+}
+
+function renderProfile() {
+  const w = currentWorker;
+  const reviews = DB.reviews.filter(r => r.workerId === w.id);
+  const el = document.getElementById('profile-content');
+  el.innerHTML = `
+    <div class="profile-hero">
+      <div class="container">
+        <button class="back-btn" onclick="navigateTo('listings')" style="color:rgba(255,255,255,0.7)">← Back to listings</button>
+      </div>
+      <div class="profile-hero-inner">
+        <div class="profile-avatar" style="background:${w.avatarColor}">${w.avatar}</div>
+        <div class="profile-info">
+          <h1 class="profile-name">${w.name}</h1>
+          <div class="profile-meta">
+            <span class="profile-cat">${getCatIcon(w.categoryId)} ${w.category}</span>
+            <span style="color:rgba(255,255,255,0.5)">•</span>
+            <span style="color:rgba(255,255,255,0.7);font-size:14px">📍 ${w.location}</span>
+            ${w.verified?'<span class="badge badge-success">✅ Verified</span>':'<span class="badge badge-warning">⏳ Pending Verification</span>'}
+          </div>
+          <div class="profile-actions">
+            ${currentUser && currentUser.role === 'customer' ?
+              `<button class="btn btn-primary" onclick="openBookingModal()">📅 Book Now · ₹${w.hourlyRate}/hr</button>` :
+              `<button class="btn btn-primary" onclick="navigateTo('auth')">Login to Book</button>`}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="profile-body">
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-box-val">${w.rating>0?w.rating.toFixed(1):'N/A'}</div><div class="stat-box-lab">⭐ Rating</div></div>
+        <div class="stat-box"><div class="stat-box-val">${w.reviewCount}</div><div class="stat-box-lab">💬 Reviews</div></div>
+        <div class="stat-box"><div class="stat-box-val">${w.completedJobs}</div><div class="stat-box-lab">✅ Jobs Done</div></div>
+      </div>
+      <div class="profile-grid">
+        <div>
+          <div class="info-card">
+            <div class="info-card-title">👤 About</div>
+            <p style="color:var(--text2);line-height:1.8;font-size:15px">${w.bio}</p>
+            <div class="wc-skills" style="margin-top:14px">${w.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">📞 Contact Info</div>
+            <div style="font-size:14px;color:var(--text2);display:flex;flex-direction:column;gap:8px">
+              <div>📱 ${w.phone}</div>
+              <div>✉️ ${w.email}</div>
+              <div>📍 ${w.location}</div>
+              <div>💰 ₹${w.hourlyRate} per hour</div>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">⭐ Reviews (${reviews.length})</div>
+            ${reviews.length ? reviews.map(r => `
+              <div class="review-item">
+                <div class="review-header">
+                  <div class="review-avatar" style="background:${r.avatarColor}">${r.customerName.slice(0,2).toUpperCase()}</div>
+                  <div>
+                    <div class="review-name">${r.customerName}</div>
+                    <div class="review-date">${formatDate(r.date)}</div>
+                  </div>
+                  <div class="stars" style="margin-left:auto">${renderStars(r.rating)}</div>
+                </div>
+                <div class="review-text">"${r.comment}"</div>
+              </div>`).join('') :
+              '<div class="empty-state"><div class="empty-state-icon">💬</div><div class="empty-state-sub">No reviews yet</div></div>'}
+          </div>
+        </div>
+        <div>
+          <div class="info-card">
+            <div class="info-card-title">📅 Availability Calendar</div>
+            <div id="profile-calendar"></div>
+            <div class="cal-legend">
+              <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--surface3)"></div>Available</div>
+              <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(233,69,96,0.2)"></div>Unavailable</div>
+              <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--accent)"></div>Selected</div>
+            </div>
+            <div class="slots-section" id="slots-section" style="display:none">
+              <div class="slots-title">Select a time slot</div>
+              <div class="slots-grid" id="slots-grid"></div>
+              ${currentUser && currentUser.role === 'customer' ? '<button class="btn btn-primary btn-block" style="margin-top:12px;border-radius:var(--radius-sm)" onclick="openBookingModal()">Confirm Booking</button>' : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  renderProfileCalendar();
+}
+
+const TIME_SLOTS = ['09:00 AM','10:00 AM','11:00 AM','12:00 PM','02:00 PM','03:00 PM','04:00 PM','05:00 PM'];
+
+function renderProfileCalendar() {
+  const el = document.getElementById('profile-calendar');
+  if (!el) return;
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayStr = getTodayStr();
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let html = `<div class="cal-header"><button class="cal-nav">‹</button><div class="cal-title">${monthNames[month]} ${year}</div><button class="cal-nav">›</button></div>`;
+  html += `<div class="cal-grid">${days.map(d=>`<div class="cal-day-name">${d}</div>`).join('')}`;
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === todayStr;
+    const isUnavail = currentWorker.unavailableDates.includes(dateStr);
+    const isPast = dateStr < todayStr;
+    const isSelected = dateStr === selectedDate;
+    let cls = 'cal-day';
+    if (isPast) cls += ' past';
+    else if (isUnavail) cls += ' unavail';
+    else if (isSelected) cls += ' selected';
+    else if (isToday) cls += ' today';
+    const onClick = (!isPast && !isUnavail) ? `onclick="selectCalDay('${dateStr}')"` : '';
+    html += `<div class="${cls}" ${onClick}>${d}</div>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function selectCalDay(dateStr) {
+  selectedDate = dateStr;
+  selectedSlot = null;
+  renderProfileCalendar();
+  const slotsSection = document.getElementById('slots-section');
+  const slotsGrid = document.getElementById('slots-grid');
+  if (!slotsSection || !slotsGrid) return;
+  slotsSection.style.display = 'block';
+  const bookedSlots = DB.bookings.filter(b => b.workerId === currentWorker.id && b.date === dateStr && b.status !== 'cancelled').map(b => b.slot);
+  slotsGrid.innerHTML = TIME_SLOTS.map(s => {
+    const isBooked = bookedSlots.includes(s);
+    return `<button class="slot-btn${isBooked?' booked':''}" onclick="${isBooked?'':''}" ${isBooked?'disabled':''} data-slot="${s}" onclick="selectSlot(this,'${s}')">${s}</button>`;
+  }).join('');
+  // Fix onclick
+  slotsGrid.querySelectorAll('.slot-btn:not(.booked)').forEach(btn => {
+    btn.onclick = () => selectSlot(btn, btn.dataset.slot);
+  });
+}
+
+function selectSlot(btn, slot) {
+  selectedSlot = slot;
+  document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// ================================================================
+// BOOKING MODAL
+// ================================================================
+function openBookingModal() {
+  if (!currentUser) { navigateTo('auth'); return; }
+  if (currentUser.role !== 'customer') { showToast('Only customers can book workers', 'error'); return; }
+  const body = document.getElementById('booking-modal-body');
+  const w = currentWorker;
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:var(--radius-sm)">
+      <div class="wc-avatar" style="background:${w.avatarColor};width:44px;height:44px;border-radius:10px;font-size:16px">${w.avatar}</div>
+      <div><div style="font-weight:700">${w.name}</div><div style="font-size:13px;color:var(--text2)">${w.category} · ₹${w.hourlyRate}/hr</div></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Service Date</label>
+      <input class="form-control" type="date" id="book-date" value="${selectedDate||''}" min="${getTodayStr()}" onchange="updateBookingSlots()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Time Slot</label>
+      <div class="slots-grid" id="modal-slots-grid"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Your Address</label>
+      <input class="form-control" id="book-address" placeholder="Full address for the service" value="">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Special Instructions (optional)</label>
+      <textarea class="form-control" id="book-notes" placeholder="Any specific requirements..."></textarea>
+    </div>
+    <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px;font-size:13px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Hourly Rate:</span><strong>₹${w.hourlyRate}</strong></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Platform Fee:</span><strong>₹50</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;padding-top:6px;border-top:1px solid var(--border)"><span>Estimated Total:</span><span style="color:var(--accent)">₹${w.hourlyRate+50}</span></div>
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" onclick="confirmBooking()">Confirm Booking</button>`;
+  if (selectedDate) setTimeout(() => updateBookingSlots(), 50);
+  openModal('booking-modal');
+}
+
+function updateBookingSlots() {
+  const date = document.getElementById('book-date')?.value;
+  const grid = document.getElementById('modal-slots-grid');
+  if (!grid) return;
+  const bookedSlots = DB.bookings.filter(b => b.workerId === currentWorker.id && b.date === date && b.status !== 'cancelled').map(b => b.slot);
+  grid.innerHTML = TIME_SLOTS.map(s => {
+    const isBooked = bookedSlots.includes(s);
+    const isSelected = s === selectedSlot;
+    return `<button class="slot-btn${isBooked?' booked':isSelected?' selected':''}" ${isBooked?'disabled':''} onclick="selectedSlot='${s}';document.querySelectorAll('#modal-slots-grid .slot-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected')">${s}</button>`;
+  }).join('');
+}
+
+function confirmBooking() {
+  const date = document.getElementById('book-date')?.value;
+  const address = document.getElementById('book-address')?.value.trim();
+  if (!date) { showToast('Please select a date', 'error'); return; }
+  if (!selectedSlot) { showToast('Please select a time slot', 'error'); return; }
+  if (!address) { showToast('Please enter your address', 'error'); return; }
+  const w = currentWorker;
+  const booking = {
+    id: 'b' + (++DB.nextId),
+    customerId: currentUser.id,
+    workerId: w.id,
+    date, slot: selectedSlot,
+    status: 'confirmed',
+    address,
+    amount: w.hourlyRate + 50,
+    reviewed: false,
+    workerName: w.name,
+    customerName: currentUser.name,
+    category: w.category
+  };
+  DB.bookings.push(booking);
+  const body = document.getElementById('booking-modal-body');
+  body.innerHTML = `
+    <div class="booking-confirm">
+      <div class="booking-confirm-icon">🎉</div>
+      <div class="booking-confirm-title">Booking Confirmed!</div>
+      <div class="booking-confirm-sub">${w.name} will visit you on ${formatDate(date)} at ${selectedSlot}</div>
+      <div class="booking-details-box">
+        <div class="booking-detail-row"><span class="booking-detail-label">Worker</span><span class="booking-detail-val">${w.name}</span></div>
+        <div class="booking-detail-row"><span class="booking-detail-label">Service</span><span class="booking-detail-val">${w.category}</span></div>
+        <div class="booking-detail-row"><span class="booking-detail-label">Date</span><span class="booking-detail-val">${formatDate(date)}</span></div>
+        <div class="booking-detail-row"><span class="booking-detail-label">Time</span><span class="booking-detail-val">${selectedSlot}</span></div>
+        <div class="booking-detail-row"><span class="booking-detail-label">Total</span><span class="booking-detail-val" style="color:var(--accent)">₹${w.hourlyRate+50}</span></div>
+      </div>
+      <button class="btn btn-secondary btn-block" onclick="closeModal('booking-modal')">Done</button>
+    </div>`;
+  showToast('Booking confirmed! 🎉', 'success');
+  selectedDate = null; selectedSlot = null;
+}
+
+// ================================================================
+// CUSTOMER DASHBOARD
+// ================================================================
+function renderCustomerDash() {}
+function custDashTab(tab) {
+  const el = document.getElementById('cust-dash-content');
+  document.querySelectorAll('#page-customer-dash .sidebar-item').forEach((s,i) => {
+    s.classList.toggle('active', ['overview','bookings','reviews','profile'].indexOf(tab) === i);
+  });
+  const myBookings = DB.bookings.filter(b => b.customerId === currentUser?.id);
+  const myReviews = DB.reviews.filter(r => r.customerId === currentUser?.id);
+  if (tab === 'overview') {
+    el.innerHTML = `
+      <div class="dash-header"><div><div class="dash-title">Welcome back, ${currentUser?.name.split(' ')[0]}! 👋</div><div class="dash-sub">Here's your booking overview</div></div><button class="btn btn-primary" onclick="navigateTo('listings')">+ Book a Service</button></div>
+      <div class="stats-cards">
+        <div class="stat-card"><div class="stat-card-icon">📋</div><div class="stat-card-val">${myBookings.length}</div><div class="stat-card-label">Total Bookings</div></div>
+        <div class="stat-card"><div class="stat-card-icon">✅</div><div class="stat-card-val">${myBookings.filter(b=>b.status==='completed').length}</div><div class="stat-card-label">Completed</div></div>
+        <div class="stat-card"><div class="stat-card-icon">⏳</div><div class="stat-card-val">${myBookings.filter(b=>b.status==='pending'||b.status==='confirmed').length}</div><div class="stat-card-label">Upcoming</div></div>
+        <div class="stat-card"><div class="stat-card-icon">⭐</div><div class="stat-card-val">${myReviews.length}</div><div class="stat-card-label">Reviews Left</div></div>
+      </div>
+      <div class="section-card">
+        <div class="section-card-header"><div class="section-card-title">Recent Bookings</div><button class="btn btn-outline btn-sm" onclick="custDashTab('bookings')">View All</button></div>
+        <div class="section-card-body">${renderBookingsTable(myBookings.slice(0,3), 'customer')}</div>
+      </div>`;
+  } else if (tab === 'bookings') {
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">My Bookings</div><button class="btn btn-primary" onclick="navigateTo('listings')">+ New Booking</button></div>
+      <div class="section-card"><div class="section-card-body">${renderBookingsTable(myBookings, 'customer')}</div></div>`;
+  } else if (tab === 'reviews') {
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">My Reviews</div></div>
+      ${myReviews.length ? `<div class="section-card"><div class="section-card-body">${myReviews.map(r=>`<div class="review-item"><div class="review-header"><div class="stars">${renderStars(r.rating)}</div><div class="review-date">${formatDate(r.date)}</div></div><div class="review-text">${r.comment}</div></div>`).join('')}</div></div>` :
+      `<div class="empty-state"><div class="empty-state-icon">⭐</div><div class="empty-state-text">No reviews yet</div><div class="empty-state-sub">Complete a booking and leave a review!</div></div>`}`;
+    const unreviewedCompleted = myBookings.filter(b => b.status === 'completed' && !b.reviewed);
+    if (unreviewedCompleted.length) {
+      el.innerHTML += `<div class="section-card" style="margin-top:16px"><div class="section-card-header"><div class="section-card-title">Pending Reviews (${unreviewedCompleted.length})</div></div><div class="section-card-body">${unreviewedCompleted.map(b=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:600">${b.workerName}</div><div style="font-size:13px;color:var(--text2)">${b.category} · ${formatDate(b.date)}</div></div><button class="btn btn-primary btn-sm" onclick="openReviewModal('${b.id}','${b.workerId}','${b.workerName}')">Leave Review</button></div>`).join('')}</div></div>`;
+    }
+  } else if (tab === 'profile') {
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">My Profile</div></div>
+      <div class="section-card" style="max-width:500px"><div class="section-card-body"><div class="form-group"><label class="form-label">Full Name</label><input class="form-control" value="${currentUser.name}" id="prof-name"></div><div class="form-group"><label class="form-label">Email</label><input class="form-control" value="${currentUser.email}" disabled></div><div class="form-group"><label class="form-label">Phone</label><input class="form-control" value="${currentUser.phone||''}" id="prof-phone"></div><button class="btn btn-primary" onclick="saveProfile()" style="margin-top:8px">Save Changes</button></div></div>`;
+  }
+}
+
+function renderBookingsTable(bookings, role) {
+  if (!bookings.length) return `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No bookings yet</div></div>`;
+  return `<table class="data-table"><thead><tr><th>${role==='customer'?'Worker':'Customer'}</th><th>Date & Time</th><th>Category</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${bookings.map(b=>`<tr>
+      <td><strong>${role==='customer'?b.workerName:b.customerName}</strong></td>
+      <td>${formatDate(b.date)}<br><span style="color:var(--text3);font-size:12px">${b.slot}</span></td>
+      <td>${b.category}</td>
+      <td>₹${b.amount}</td>
+      <td><span class="badge ${b.status==='confirmed'?'badge-success':b.status==='pending'?'badge-warning':b.status==='completed'?'badge-blue':'badge-danger'}">${b.status}</span></td>
+      <td>${role==='customer'&&b.status==='completed'&&!b.reviewed?`<button class="btn btn-sm btn-outline" onclick="openReviewModal('${b.id}','${b.workerId}','${b.workerName}')">Review</button>`:
+           role==='customer'&&b.status==='pending'?`<button class="btn btn-sm btn-danger" onclick="cancelBooking('${b.id}')">Cancel</button>`:'—'}</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function cancelBooking(id) {
+  const b = DB.bookings.find(x=>x.id===id);
+  if (b) { b.status = 'cancelled'; showToast('Booking cancelled', 'info'); }
+  if (currentUser.role==='customer') custDashTab('bookings');
+  else workerDashTab('bookings');
+}
+
+function saveProfile() {
+  if (currentUser) {
+    currentUser.name = document.getElementById('prof-name')?.value||currentUser.name;
+    currentUser.phone = document.getElementById('prof-phone')?.value||currentUser.phone;
+    showToast('Profile updated!', 'success');
+  }
+}
+
+// ================================================================
+// REVIEW MODAL
+// ================================================================
+let reviewingBookingId = null;
+function openReviewModal(bookingId, workerId, workerName) {
+  reviewingBookingId = bookingId;
+  const body = document.getElementById('review-modal-body');
+  let stars = 0;
+  body.innerHTML = `
+    <p style="color:var(--text2);font-size:14px">Share your experience with <strong>${workerName}</strong></p>
+    <div>
+      <div class="form-label" style="margin-bottom:8px">Rating</div>
+      <div id="star-picker" style="display:flex;gap:6px">${[1,2,3,4,5].map(i=>`<span style="font-size:32px;cursor:pointer;color:#ddd" onclick="setReviewStar(${i})" data-star="${i}">★</span>`).join('')}</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Your Review</label>
+      <textarea class="form-control" id="review-text" placeholder="Tell us about your experience..." style="min-height:100px"></textarea>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="submitReview('${workerId}')">Submit Review</button>`;
+  openModal('review-modal');
+}
+
+function setReviewStar(val) {
+  document.querySelectorAll('#star-picker span').forEach((s,i) => { s.style.color = i<val?'#f5a623':'#ddd'; });
+  document.getElementById('star-picker').dataset.val = val;
+}
+
+function submitReview(workerId) {
+  const rating = parseInt(document.getElementById('star-picker')?.dataset.val||0);
+  const comment = document.getElementById('review-text')?.value.trim();
+  if (!rating) { showToast('Please select a rating', 'error'); return; }
+  if (!comment) { showToast('Please write a review', 'error'); return; }
+  const worker = DB.workers.find(w=>w.id===workerId);
+  const review = { id:'r'+(++DB.nextId), workerId, customerId:currentUser.id, customerName:currentUser.name.split(' ')[0]+' '+currentUser.name.split(' ')[1]?.[0]||'', rating, comment, date:getTodayStr(), avatarColor:currentUser.avatarColor };
+  DB.reviews.push(review);
+  if (worker) {
+    const allReviews = DB.reviews.filter(r=>r.workerId===workerId);
+    worker.rating = +(allReviews.reduce((s,r)=>s+r.rating,0)/allReviews.length).toFixed(1);
+    worker.reviewCount = allReviews.length;
+  }
+  const booking = DB.bookings.find(b=>b.id===reviewingBookingId);
+  if (booking) booking.reviewed = true;
+  closeModal('review-modal');
+  showToast('Review submitted! Thank you 🌟', 'success');
+  if (currentUser.role==='customer') custDashTab('reviews');
+}
+
+// ================================================================
+// WORKER DASHBOARD
+// ================================================================
+function renderWorkerDash() {}
+function workerDashTab(tab) {
+  const el = document.getElementById('worker-dash-content');
+  document.querySelectorAll('#page-worker-dash .sidebar-item').forEach((s,i) => {
+    s.classList.toggle('active', ['overview','bookings','availability','profile','reviews'].indexOf(tab) === i);
+  });
+  const w = DB.workers.find(x=>x.id===currentUser?.workerId);
+  if (!w) { el.innerHTML='<div class="empty-state"><div class="empty-state-text">Worker profile not found</div></div>'; return; }
+  const myBookings = DB.bookings.filter(b=>b.workerId===w.id);
+  if (tab==='overview') {
+    el.innerHTML = `
+      <div class="dash-header"><div><div class="dash-title">Worker Dashboard</div><div class="dash-sub">${w.category} · ${w.verified?'✅ Verified':'⏳ Pending Verification'}</div></div></div>
+      <div class="stats-cards">
+        <div class="stat-card"><div class="stat-card-icon">⭐</div><div class="stat-card-val">${w.rating||'N/A'}</div><div class="stat-card-label">Rating</div></div>
+        <div class="stat-card"><div class="stat-card-icon">💼</div><div class="stat-card-val">${w.completedJobs}</div><div class="stat-card-label">Jobs Done</div></div>
+        <div class="stat-card"><div class="stat-card-icon">📋</div><div class="stat-card-val">${myBookings.filter(b=>b.status==='confirmed').length}</div><div class="stat-card-label">Upcoming</div></div>
+        <div class="stat-card"><div class="stat-card-icon">💰</div><div class="stat-card-val">₹${myBookings.filter(b=>b.status==='completed').reduce((s,b)=>s+b.amount,0).toLocaleString()}</div><div class="stat-card-label">Total Earned</div></div>
+      </div>
+      <div class="section-card"><div class="section-card-header"><div class="section-card-title">Upcoming Bookings</div></div><div class="section-card-body">${renderWorkerBookingsTable(myBookings.filter(b=>b.status!=='cancelled').slice(0,5))}</div></div>`;
+  } else if (tab==='bookings') {
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">All Bookings</div></div><div class="section-card"><div class="section-card-body">${renderWorkerBookingsTable(myBookings)}</div></div>`;
+  } else if (tab==='availability') {
+    renderWorkerAvailability(el, w);
+  } else if (tab==='profile') {
+    renderWorkerProfileEdit(el, w);
+  } else if (tab==='reviews') {
+    const revs = DB.reviews.filter(r=>r.workerId===w.id);
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">My Reviews</div></div>
+      <div class="section-card"><div class="section-card-body">${revs.length?revs.map(r=>`<div class="review-item"><div class="review-header"><div class="review-avatar" style="background:${r.avatarColor}">${r.customerName.slice(0,2).toUpperCase()}</div><div><div class="review-name">${r.customerName}</div><div class="review-date">${formatDate(r.date)}</div></div><div class="stars" style="margin-left:auto">${renderStars(r.rating)}</div></div><div class="review-text">"${r.comment}"</div></div>`).join('') : '<div class="empty-state"><div class="empty-state-icon">⭐</div><div class="empty-state-sub">No reviews yet</div></div>'}</div></div>`;
+  }
+}
+
+function renderWorkerBookingsTable(bookings) {
+  if (!bookings.length) return `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">No bookings yet</div></div>`;
+  return `<table class="data-table"><thead><tr><th>Customer</th><th>Date & Time</th><th>Address</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${bookings.map(b=>`<tr><td><strong>${b.customerName}</strong></td><td>${formatDate(b.date)}<br><span style="color:var(--text3);font-size:12px">${b.slot}</span></td><td style="font-size:13px;max-width:150px">${b.address}</td><td>₹${b.amount}</td><td><span class="badge ${b.status==='confirmed'?'badge-success':b.status==='pending'?'badge-warning':b.status==='completed'?'badge-blue':'badge-danger'}">${b.status}</span></td>
+    <td style="display:flex;gap:6px;flex-wrap:wrap">${b.status==='confirmed'?`<button class="btn btn-sm btn-teal" onclick="updateBookingStatus('${b.id}','completed')">✓ Done</button><button class="btn btn-sm btn-danger" onclick="cancelBooking('${b.id}')">✗</button>`:'—'}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function updateBookingStatus(id, status) {
+  const b = DB.bookings.find(x=>x.id===id);
+  if (b) { b.status = status; const w = DB.workers.find(x=>x.id===b.workerId); if(w&&status==='completed')w.completedJobs++; showToast(`Booking marked as ${status}`, 'success'); workerDashTab('bookings'); }
+}
+
+function renderWorkerAvailability(el, w) {
+  el.innerHTML = `<div class="dash-header"><div class="dash-title">Manage Availability</div></div>
+    <div class="section-card" style="max-width:500px"><div class="section-card-header"><div class="section-card-title">📅 Mark Unavailable Dates</div></div>
+    <div class="section-card-body">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">Click dates to toggle them as unavailable. Red dates are already marked unavailable.</p>
+      <div id="worker-cal-avail"></div>
+      <div style="margin-top:16px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">Currently Unavailable:</div>
+        <div id="unavail-list" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+    </div></div>`;
+  renderWorkerCalAvail(w);
+}
+
+function renderWorkerCalAvail(w) {
+  const el = document.getElementById('worker-cal-avail');
+  const list = document.getElementById('unavail-list');
+  if (!el) return;
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayStr = getTodayStr();
+  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let html = `<div class="cal-header"><div class="cal-title">${monthNames[month]} ${year}</div></div>`;
+  html += `<div class="cal-grid">${days.map(d=>`<div class="cal-day-name">${d}</div>`).join('')}`;
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isUnavail=w.unavailableDates.includes(ds);
+    const isPast=ds<todayStr;
+    let cls='cal-day'+(isPast?' past':isUnavail?' unavail':'');
+    html+=`<div class="${cls}" ${!isPast?`onclick="toggleUnavailDate('${ds}','${w.id}')"`:''}>${d}</div>`;
+  }
+  html+='</div>';
+  el.innerHTML=html;
+  if(list) list.innerHTML=w.unavailableDates.length?w.unavailableDates.map(d=>`<span style="background:rgba(233,69,96,0.1);color:var(--accent);padding:3px 10px;border-radius:50px;font-size:12px;font-weight:600">${d}</span>`).join('') : '<span style="color:var(--text3);font-size:13px">None marked</span>';
+}
+
+function toggleUnavailDate(date, workerId) {
+  const w = DB.workers.find(x=>x.id===workerId);
+  if(!w) return;
+  const idx = w.unavailableDates.indexOf(date);
+  if(idx>=0) w.unavailableDates.splice(idx,1);
+  else w.unavailableDates.push(date);
+  renderWorkerCalAvail(w);
+  showToast(idx>=0?'Date marked available':'Date marked unavailable','info');
+}
+
+function renderWorkerProfileEdit(el, w) {
+  el.innerHTML = `<div class="dash-header"><div class="dash-title">My Profile</div></div>
+    <div class="section-card" style="max-width:600px"><div class="section-card-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="wp-name" value="${w.name}"></div>
+        <div class="form-group"><label class="form-label">Hourly Rate (₹)</label><input class="form-control" type="number" id="wp-rate" value="${w.hourlyRate}"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Category</label>
+        <select class="form-control" id="wp-cat">${DB.categories.map(c=>`<option value="${c.id}" ${w.categoryId===c.id?'selected':''}>${c.name}</option>`).join('')}</select>
+      </div>
+      <div class="form-group"><label class="form-label">Location</label><input class="form-control" id="wp-loc" value="${w.location}"></div>
+      <div class="form-group"><label class="form-label">Bio</label><textarea class="form-control" id="wp-bio">${w.bio}</textarea></div>
+      <div class="form-group"><label class="form-label">Skills (comma separated)</label><input class="form-control" id="wp-skills" value="${w.skills.join(', ')}"></div>
+      <button class="btn btn-primary" onclick="saveWorkerProfile('${w.id}')">Save Profile</button>
+    </div></div>`;
+}
+
+function saveWorkerProfile(wid) {
+  const w = DB.workers.find(x=>x.id===wid);
+  if(!w) return;
+  w.name = document.getElementById('wp-name').value||w.name;
+  w.hourlyRate = parseInt(document.getElementById('wp-rate').value)||w.hourlyRate;
+  w.categoryId = document.getElementById('wp-cat').value;
+  w.category = DB.categories.find(c=>c.id===w.categoryId)?.name||w.category;
+  w.location = document.getElementById('wp-loc').value||w.location;
+  w.bio = document.getElementById('wp-bio').value||w.bio;
+  w.skills = document.getElementById('wp-skills').value.split(',').map(s=>s.trim()).filter(Boolean);
+  showToast('Profile updated!','success');
+}
+
+// ================================================================
+// ADMIN DASHBOARD
+// ================================================================
+function renderAdminDash() {}
+function adminDashTab(tab) {
+  const el = document.getElementById('admin-dash-content');
+  document.querySelectorAll('#page-admin-dash .sidebar-item').forEach((s,i)=>{
+    s.classList.toggle('active',['overview','workers','bookings','customers','reviews','categories'].indexOf(tab)===i);
+  });
+  const stats = {
+    totalWorkers: DB.workers.length,
+    verified: DB.workers.filter(w=>w.verified).length,
+    pending: DB.workers.filter(w=>!w.verified).length,
+    bookings: DB.bookings.length,
+    revenue: DB.bookings.filter(b=>b.status==='completed').reduce((s,b)=>s+b.amount,0),
+    customers: DB.users.filter(u=>u.role==='customer').length,
+    reviews: DB.reviews.length,
+    avgRating: DB.workers.length ? (DB.workers.reduce((s,w)=>s+w.rating,0)/DB.workers.length).toFixed(1) : 0
+  };
+  if (tab==='overview') {
+    el.innerHTML = `<div class="dash-header"><div><div class="dash-title">Admin Dashboard</div><div class="dash-sub">Platform overview</div></div></div>
+      <div class="stats-cards">
+        <div class="stat-card"><div class="stat-card-icon">👷</div><div class="stat-card-val">${stats.totalWorkers}</div><div class="stat-card-label">Total Workers</div><div class="stat-card-change up">↑ ${stats.verified} verified</div></div>
+        <div class="stat-card"><div class="stat-card-icon">📋</div><div class="stat-card-val">${stats.bookings}</div><div class="stat-card-label">Total Bookings</div></div>
+        <div class="stat-card"><div class="stat-card-icon">👥</div><div class="stat-card-val">${stats.customers}</div><div class="stat-card-label">Customers</div></div>
+        <div class="stat-card"><div class="stat-card-icon">💰</div><div class="stat-card-val">₹${stats.revenue.toLocaleString()}</div><div class="stat-card-label">Revenue</div></div>
+        <div class="stat-card"><div class="stat-card-icon">⭐</div><div class="stat-card-val">${stats.avgRating}</div><div class="stat-card-label">Avg Rating</div></div>
+        <div class="stat-card"><div class="stat-card-icon">⏳</div><div class="stat-card-val">${stats.pending}</div><div class="stat-card-label">Pending Verification</div><div class="stat-card-change down">Needs review</div></div>
+      </div>
+      ${stats.pending?`<div class="section-card"><div class="section-card-header"><div class="section-card-title">⚠️ Pending Verifications</div></div><div class="section-card-body">${DB.workers.filter(w=>!w.verified).map(w=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;gap:10px"><div class="wc-avatar" style="background:${w.avatarColor};width:36px;height:36px;border-radius:8px;font-size:14px">${w.avatar}</div><div><div style="font-weight:600">${w.name}</div><div style="font-size:12px;color:var(--text2)">${w.category}</div></div></div><div style="display:flex;gap:8px"><button class="btn btn-sm btn-teal" onclick="verifyWorker('${w.id}',true)">✅ Verify</button><button class="btn btn-sm btn-danger" onclick="verifyWorker('${w.id}',false)">✕ Reject</button></div></div>`).join('')}</div></div>`:''}
+      <div class="section-card"><div class="section-card-header"><div class="section-card-title">Recent Bookings</div></div><div class="section-card-body">${renderAdminBookingsTable(DB.bookings.slice(-5).reverse())}</div></div>`;
+  } else if (tab==='workers') {
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">All Workers</div></div>
+      <div class="section-card"><div class="section-card-body"><table class="data-table"><thead><tr><th>Worker</th><th>Category</th><th>Rating</th><th>Jobs</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+      ${DB.workers.map(w=>`<tr><td><div style="display:flex;align-items:center;gap:8px"><div class="wc-avatar" style="background:${w.avatarColor};width:32px;height:32px;border-radius:8px;font-size:12px">${w.avatar}</div><div><div style="font-weight:600">${w.name}</div><div style="font-size:12px;color:var(--text2)">${w.email}</div></div></div></td><td>${w.category}</td><td>${w.rating?w.rating+'★':'—'}</td><td>${w.completedJobs}</td><td><span class="badge ${w.verified?'badge-success':'badge-warning'}">${w.verified?'Verified':'Pending'}</span></td>
+      <td style="display:flex;gap:6px">${!w.verified?`<button class="btn btn-sm btn-teal" onclick="verifyWorker('${w.id}',true)">Verify</button>`:`<button class="btn btn-sm btn-danger" onclick="verifyWorker('${w.id}',false)">Unverify</button>`}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
+  } else if (tab==='bookings') {
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">All Bookings</div></div><div class="section-card"><div class="section-card-body">${renderAdminBookingsTable(DB.bookings)}</div></div>`;
+  } else if (tab==='customers') {
+    const customers = DB.users.filter(u=>u.role==='customer');
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">All Customers</div></div>
+      <div class="section-card"><div class="section-card-body"><table class="data-table"><thead><tr><th>Customer</th><th>Email</th><th>Phone</th><th>Bookings</th></tr></thead><tbody>
+      ${customers.map(c=>`<tr><td><div style="display:flex;align-items:center;gap:8px"><div class="user-avatar" style="background:${c.avatarColor};width:32px;height:32px">${c.avatar}</div>${c.name}</div></td><td>${c.email}</td><td>${c.phone||'—'}</td><td>${DB.bookings.filter(b=>b.customerId===c.id).length}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
+  } else if (tab==='reviews') {
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">All Reviews</div></div>
+      <div class="section-card"><div class="section-card-body">${DB.reviews.map(r=>`<div class="review-item"><div class="review-header"><div class="review-avatar" style="background:${r.avatarColor}">${r.customerName.slice(0,2)}</div><div><div class="review-name">${r.customerName} → ${DB.workers.find(w=>w.id===r.workerId)?.name}</div><div class="review-date">${formatDate(r.date)}</div></div><div class="stars" style="margin-left:auto">${renderStars(r.rating)}</div></div><div class="review-text">"${r.comment}"</div></div>`).join('')}</div></div>`;
+  } else if (tab==='categories') {
+    el.innerHTML = `<div class="dash-header"><div class="dash-title">Categories</div></div>
+      <div class="section-card"><div class="section-card-body"><table class="data-table"><thead><tr><th>Icon</th><th>Name</th><th>Workers</th></tr></thead><tbody>
+      ${DB.categories.map(c=>`<tr><td style="font-size:24px">${c.icon}</td><td>${c.name}</td><td>${DB.workers.filter(w=>w.categoryId===c.id).length}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
+  }
+}
+
+function renderAdminBookingsTable(bookings) {
+  if(!bookings.length) return '<div class="empty-state"><div class="empty-state-text">No bookings</div></div>';
+  return `<table class="data-table"><thead><tr><th>Customer</th><th>Worker</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>
+  ${bookings.map(b=>`<tr><td>${b.customerName}</td><td>${b.workerName}</td><td>${formatDate(b.date)} ${b.slot}</td><td>₹${b.amount}</td><td><span class="badge ${b.status==='confirmed'?'badge-success':b.status==='pending'?'badge-warning':b.status==='completed'?'badge-blue':'badge-danger'}">${b.status}</span></td>
+  <td>${b.status!=='cancelled'&&b.status!=='completed'?`<button class="btn btn-sm btn-danger" onclick="adminCancelBooking('${b.id}')">Cancel</button>`:'—'}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function adminCancelBooking(id) {
+  const b=DB.bookings.find(x=>x.id===id);
+  if(b){b.status='cancelled';showToast('Booking cancelled','info');adminDashTab('bookings');}
+}
+
+function verifyWorker(wid, verify) {
+  const w=DB.workers.find(x=>x.id===wid);
+  if(w){w.verified=verify;showToast(verify?`${w.name} verified ✅`:`${w.name} verification revoked`,'success');adminDashTab('workers');}
+}
+
+// ================================================================
+// AI CHATBOT
+// ================================================================
+let chatOpen = false;
+const chatQuickQueries = [
+  'Top rated plumbers',
+  'Available electricians today',
+  'Cheapest AC repair',
+  'Best rated workers',
+  'Solar panel experts'
+];
+
+function initChat() {
+  addBotMessage("Hi! 👋 I'm WorkBook AI. I can help you find the perfect worker for your needs. What are you looking for?");
+  const qEl = document.getElementById('chat-quick-btns');
+  if(qEl) qEl.innerHTML = chatQuickQueries.map(q=>`<button class="chat-quick-btn" onclick="sendQuickChat('${q}')">${q}</button>`).join('');
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const w = document.getElementById('chat-window');
+  w.classList.toggle('open', chatOpen);
+  if(chatOpen && document.getElementById('chat-messages').children.length === 0) initChat();
+}
+
+function addBotMessage(text) {
+  const m = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg bot';
+  div.innerHTML = `<div class="chat-bubble">${text}</div>`;
+  m.appendChild(div);
+  m.scrollTop = m.scrollHeight;
+}
+
+function addUserMessage(text) {
+  const m = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg user';
+  div.innerHTML = `<div class="chat-bubble">${text}</div>`;
+  m.appendChild(div);
+  m.scrollTop = m.scrollHeight;
+}
+
+function showTyping() {
+  const m = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg bot'; div.id = 'typing-indicator';
+  div.innerHTML = `<div class="chat-bubble"><div class="chat-typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  m.appendChild(div); m.scrollTop = m.scrollHeight;
+}
+
+function hideTyping() { document.getElementById('typing-indicator')?.remove(); }
+
+function sendQuickChat(q) { document.getElementById('chat-input').value=q; sendChat(); }
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  addUserMessage(text);
+  showTyping();
+  // Build context
+  const workerContext = DB.workers.filter(w=>w.verified).map(w=>
+    `${w.name}: ${w.category}, ₹${w.hourlyRate}/hr, Rating: ${w.rating}★ (${w.reviewCount} reviews), ${w.completedJobs} jobs, Location: ${w.location}, Available: ${isAvailToday(w)?'Yes':'Check dates'}, Skills: ${w.skills.join(', ')}`
+  ).join('\n');
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        system: `You are WorkBook AI, a helpful assistant for a worker booking platform in Bangalore, India. You help customers find the right worker.
+Available verified workers:\n${workerContext}\n
+Answer concisely (2-4 sentences max). Recommend specific workers by name when relevant. Format as plain text, no markdown. Be friendly and helpful like a Google Maps AI assistant.`,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+    hideTyping();
+    if(response.ok) {
+      const data = await response.json();
+      const reply = data.content?.[0]?.text || "I'm here to help! Try asking about specific service categories.";
+      addBotMessage(reply);
+    } else {
+      addBotMessage(getLocalAIResponse(text));
+    }
+  } catch(e) {
+    hideTyping();
+    addBotMessage(getLocalAIResponse(text));
+  }
+}
+
+function getLocalAIResponse(query) {
+  const q = query.toLowerCase();
+  const workers = DB.workers.filter(w=>w.verified);
+  if(q.includes('plumb')) {
+    const w=workers.filter(x=>x.category==='Plumber').sort((a,b)=>b.rating-a.rating);
+    return w.length?`Top plumber: ${w[0].name} — ${w[0].rating}★ from ${w[0].reviewCount} reviews, ₹${w[0].hourlyRate}/hr in ${w[0].location}. ${w.length>1?`Also: ${w[1].name} (${w[1].rating}★).`:''}`:"No plumbers found right now.";
+  }
+  if(q.includes('electric')) {
+    const w=workers.filter(x=>x.category==='Electrician').sort((a,b)=>b.rating-a.rating);
+    return w.length?`Best electrician: ${w[0].name} with ${w[0].rating}★ (${w[0].reviewCount} reviews). Rate: ₹${w[0].hourlyRate}/hr. ${isAvailToday(w[0])?'Available today!':'Check their calendar for slots.'}`:"No electricians listed.";
+  }
+  if(q.includes('ac')||q.includes('air condition')) {
+    const w=workers.filter(x=>x.category==='AC Repair').sort((a,b)=>b.rating-a.rating);
+    return w.length?`For AC repair, I recommend ${w[0].name} — ${w[0].rating}★, ₹${w[0].hourlyRate}/hr, ${w[0].completedJobs} jobs completed.`:"No AC technicians found.";
+  }
+  if(q.includes('cheap')||q.includes('low price')||q.includes('affordable')) {
+    const w=[...workers].sort((a,b)=>a.hourlyRate-b.hourlyRate);
+    return w.length?`Most affordable option: ${w[0].name} (${w[0].category}) at just ₹${w[0].hourlyRate}/hr with ${w[0].rating}★ rating.`:"Unable to fetch prices.";
+  }
+  if(q.includes('best')||q.includes('top rated')) {
+    const w=[...workers].sort((a,b)=>b.rating-a.rating);
+    return w.length?`Top rated worker: ${w[0].name} (${w[0].category}) with ${w[0].rating}★ from ${w[0].reviewCount} reviews and ${w[0].completedJobs} jobs completed!`:"No workers found.";
+  }
+  if(q.includes('solar')) {
+    const w=workers.filter(x=>x.category==='Solar Panel').sort((a,b)=>b.rating-a.rating);
+    return w.length?`Solar panel expert: ${w[0].name} — ${w[0].rating}★, ₹${w[0].hourlyRate}/hr, specializes in ${w[0].skills.join(', ')}.`:"No solar experts listed.";
+  }
+  if(q.includes('available today')) {
+    const today=getTodayStr();
+    const avail=workers.filter(w=>!w.unavailableDates.includes(today));
+    return `${avail.length} workers available today! Top picks: ${avail.slice(0,2).map(w=>`${w.name} (${w.category}, ${w.rating}★)`).join(', ')}.`;
+  }
+  const top=[...workers].sort((a,b)=>b.rating-a.rating).slice(0,3);
+  return top.length?`Here are our top workers: ${top.map(w=>`${w.name} (${w.category}, ${w.rating}★, ₹${w.hourlyRate}/hr)`).join('; ')}. You can browse all workers on the listings page!`:"I'm here to help! Try asking about plumbers, electricians, AC repair, or any other service.";
+}
+
+// ================================================================
+// HELPERS
+// ================================================================
+function renderStars(rating) {
+  return [1,2,3,4,5].map(i=>`<span class="star${i<=Math.round(rating)?' filled':''}">★</span>`).join('');
+}
+function getTodayStr() {
+  const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function isAvailToday(w) { return !w.unavailableDates.includes(getTodayStr()); }
+function formatDate(ds) {
+  if(!ds) return '';
+  const d=new Date(ds+'T00:00:00');
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+function getCatIcon(catId) { return DB.categories.find(c=>c.id===catId)?.icon||'🔨'; }
+function openModal(id) { document.getElementById(id)?.classList.add('open'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+function showToast(msg, type='info') {
+  const el=document.createElement('div');
+  el.className=`toast toast-${type}`;
+  el.textContent=msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(),3500);
+}
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(tab==='login'&&i===0)||(tab==='register'&&i===1)));
+  document.getElementById('auth-login-form').style.display=tab==='login'?'flex':'none';
+  document.getElementById('auth-register-form').style.display=tab==='register'?'flex':'none';
+}
+function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('open'); }
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+
+// ================================================================
+// INIT
+// ================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  updateNavUser();
+  renderLandingCategories();
+  navigateTo('landing');
+});
+</script>
+</body>
+</html>
